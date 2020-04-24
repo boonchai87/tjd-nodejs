@@ -6,7 +6,7 @@ const ObjectId = require("mongodb").ObjectID;
 const path = require('path')
 const PORT = process.env.PORT || 5000
 
-const CONNECTION_URL = "mongodb+srv://thaiwpservice:DxUnBD8O3sGgRZsF@cluster0-rdast.mongodb.net/test?retryWrites=true&w=majority";
+const CONNECTION_URL = "mongodb+srv://thaijavadev:El4izQohM3utJ6cb@cluster0-rdast.mongodb.net/test?retryWrites=true&w=majority";
 const DATABASE_NAME = "example";
 
 var app = express();
