@@ -14,7 +14,7 @@ module.exports = {
         let moviesList = [];
         var pageNo = parseInt(req.query.pageNo);
         var size = parseInt(req.query.size)
-        if( isNaN(size) || size> 5 ){
+        if( isNaN(size) || size> 10 ){
             size=10;// max pageSize
         }
         if ( !isNaN(pageNo) && (pageNo < 0 || pageNo === 0) ) {
