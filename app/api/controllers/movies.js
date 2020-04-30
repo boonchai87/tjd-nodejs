@@ -15,7 +15,7 @@ module.exports = {
         var pageNo = parseInt(req.query.pageNo);
         var size = parseInt(req.query.size)
         if( isNaN(size) || size> 5 ){
-            size=5;// max pageSize
+            size=10;// max pageSize
         }
         if ( !isNaN(pageNo) && (pageNo < 0 || pageNo === 0) ) {
             response = { "error": true, "message": "invalid page number, should start with 1" };
