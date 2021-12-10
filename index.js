@@ -2,7 +2,7 @@ const express = require('express');
 const logger = require('morgan');
 const movies = require('./routes/movies');
 const users = require('./routes/users');
-const bodyParser = require('body-parser');
+//const bodyParser = require('body-parser');
 
 const mongoose = require('./config/database'); //database configuration
 var jwt = require('jsonwebtoken');
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000
 // connection to mongodb
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 app.use(logger('dev'));
-app.use(bodyParser.json());
+app.use(express.json());
 //app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', function (req, res) {
     res.json({ "tutorial": "Build REST API with node.js" });
