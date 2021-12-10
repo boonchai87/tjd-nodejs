@@ -16,8 +16,9 @@ const PORT = process.env.PORT || 5000
 // connection to mongodb
 mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
 app.use(logger('dev'));
+// https://stackoverflow.com/questions/10005939/how-do-i-consume-the-json-post-data-in-an-express-application
 app.use(express.json());
-//app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.get('/', function (req, res) {
     res.json({ "tutorial": "Build REST API with node.js" });
 });
