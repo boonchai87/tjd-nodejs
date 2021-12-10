@@ -1,63 +1,62 @@
-const express = require('express')
-const BodyParser = require("body-parser");
-const MongoClient = require("mongodb").MongoClient;
-const ObjectId = require("mongodb").ObjectID;
+const express = require('express');
+const logger = require('morgan');
+const movies = require('./routes/movies');
+const users = require('./routes/users');
+const bodyParser = require('body-parser');
 
-const path = require('path')
+const mongoose = require('./config/database'); //database configuration
+var jwt = require('jsonwebtoken');
+var cors = require('cors');
+const app = express();
+app.use(cors());// for allow coss domain calling
+app.set('secretKey', 'nodeRestApi'); // jwt secret token
+
 const PORT = process.env.PORT || 5000
 
-const CONNECTION_URL = "mongodb+srv://thaijavadev:El4izQohM3utJ6cb@cluster0-rdast.mongodb.net/test?retryWrites=true&w=majority";
-const DATABASE_NAME = "example";
-
-var app = express();
-
-app.use(BodyParser.json());
-app.use(BodyParser.urlencoded({ extended: true }));
-var database, collection;
-
-app
-  .use(express.static(path.join(__dirname, 'public')))
-  .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs')
-  .get('/', (req, res) => res.render('pages/index'));
-  
-//  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
-
-app.listen(PORT, () => {
-    MongoClient.connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true  }, (error, client) => {
-        if(error) {
-            throw error;
-        }
-        database = client.db(DATABASE_NAME);
-        collection = database.collection("people");
-        console.log("Connected to `" + DATABASE_NAME + "`!");
-		console.log(`Listening on ${ PORT }`);
-    });
+// connection to mongodb
+mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
+app.use(logger('dev'));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.get('/', function (req, res) {
+    res.json({ "tutorial": "Build REST API with node.js" });
 });
 
-app.get("/people", (request, response) => {
-    collection.find({}).toArray((error, result) => {
-        if(error) {
-            return response.status(500).send(error);
-        }
-        response.send(result);
-    });
+// public route
+app.use('/users', users);
+// private route
+app.use('/movies', validateUser, movies);
+app.get('/favicon.ico', function (req, res) {
+    res.sendStatus(204);
 });
-
-app.post("/person", (request, response) => {
-    collection.insert(request.body, (error, result) => {
-        if(error) {
-            return response.status(500).send(error);
+function validateUser(req, res, next) {
+    jwt.verify(req.headers['x-access-token'], req.app.get('secretKey'), function (err, decoded) {
+        if (err) {
+			res.json({ status: "error", message: err.message, data: null });
+        } else {
+            // add user id to request
+            req.body.userId = decoded.id;
+            console.log( decoded.id);
+            next();
         }
-        response.send(result.result);
     });
+
+}
+// express doesn't consider not found 404 as an error so we need to handle 404 explicitly
+// handle 404 error
+app.use(function (req, res, next) {
+    let err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
-
-app.get("/person/:id", (request, response) => {
-    collection.findOne({ "_id": new ObjectId(request.params.id) }, (error, result) => {
-        if(error) {
-            return response.status(500).send(error);
-        }
-        response.send(result);
-    });
+// handle errors
+app.use(function (err, req, res, next) {
+    console.log(err);
+    if (err.status === 404)
+        res.status(404).json({ message: "Not found" });
+    else
+        res.status(500).json({ message: "Something looks wrong :( !!!" });
+});
+app.listen(PORT, function () {
+    console.log('Node server listening on port '+PORT);
 });
